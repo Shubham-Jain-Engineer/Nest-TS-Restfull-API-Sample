@@ -1,24 +1,55 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { userEntity } from './users/user.entity';
-import { ReportEntity } from './reports/report.entity';
+import { ReportEntity } from './reports/report.entity'
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_PIPE } from '@nestjs/core';
+// const cookieSession = require('cookie-session');
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.Node_ENV}`
+    }),
+    //TypeOrmModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        return {
+          type: 'sqlite',
+          database: config.get<string>('DB_NAME'),
+          synchronize: true, // shoud be false in production to safe lost our data 
+          entities: [userEntity, ReportEntity]
+        };
+      }
+    }),
     UsersModule,
-    ReportsModule,
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db.sqlite',
-      entities: [userEntity, ReportEntity],
-      synchronize: true
-    })
+    ReportsModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        whitelist: true,
+      }),
+    }
+  ],
 })
-export class AppModule { }
+export class AppModule {
+  constructor(
+    private configServices: ConfigService
+  ) { }
+
+  // configur(consumer: MiddlewareConsumer) {
+  //   console.log('cookie key -->', [this.configServices.get('COOKIE_KEY')]);
+  //   consumer.apply(cookieSession({
+  //     keys: [this.configServices.get('COOKIE_KEY')]
+  //   })).forRoutes('*');
+  // }
+}
