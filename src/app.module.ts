@@ -42,9 +42,9 @@ import { APP_PIPE } from '@nestjs/core';
   ],
 })
 export class AppModule {
-  constructor(
-    private configServices: ConfigService
-  ) { }
+  // constructor(
+  //   private configServices: ConfigService
+  // ) { }
 
   // configur(consumer: MiddlewareConsumer) {
   //   console.log('cookie key -->', [this.configServices.get('COOKIE_KEY')]);

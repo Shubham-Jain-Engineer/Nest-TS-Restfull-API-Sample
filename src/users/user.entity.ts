@@ -1,5 +1,7 @@
 //import { Exclude } from 'class-transformer';
-import { Entity, Column, PrimaryGeneratedColumn, AfterRemove, AfterInsert, AfterUpdate } from 'typeorm';
+
+import { ReportEntity } from 'src/reports/report.entity';
+import { Entity, Column, PrimaryGeneratedColumn, AfterRemove, AfterInsert, AfterUpdate, OneToMany } from 'typeorm';
 
 @Entity()
 export class userEntity {
@@ -12,6 +14,15 @@ export class userEntity {
   @Column()
   //@Exclude() // use with default nest intercepter
   password: string;
+
+  @Column()
+  admin: boolean;
+
+  @OneToMany(() => ReportEntity, (report) => report.user)
+  reports: ReportEntity[];
+
+
+
 
   @AfterInsert()
   logInsert() {
