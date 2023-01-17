@@ -8,7 +8,7 @@ import { userEntity } from './users/user.entity';
 import { ReportEntity } from './reports/report.entity'
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
-// const cookieSession = require('cookie-session');
+const cookieSession = require('cookie-session');
 
 @Module({
   imports: [
@@ -32,7 +32,8 @@ import { APP_PIPE } from '@nestjs/core';
     ReportsModule
   ],
   controllers: [AppController],
-  providers: [AppService,
+  providers: [
+    AppService,
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
@@ -42,14 +43,17 @@ import { APP_PIPE } from '@nestjs/core';
   ],
 })
 export class AppModule {
-  // constructor(
-  //   private configServices: ConfigService
-  // ) { }
+  constructor(
+    private configServices: ConfigService
+  ) { }
 
-  // configur(consumer: MiddlewareConsumer) {
-  //   console.log('cookie key -->', [this.configServices.get('COOKIE_KEY')]);
-  //   consumer.apply(cookieSession({
-  //     keys: [this.configServices.get('COOKIE_KEY')]
-  //   })).forRoutes('*');
-  // }
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        cookieSession({
+          keys: [this.configServices.get('COOKIE_KEY')],
+        }),
+      )
+      .forRoutes('*');
+  }
 }

@@ -3,25 +3,30 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { AuthService } from 'src/users/auth/auth.service';
-import { AuthGuard } from 'src/gaurds/auth.gaurd';
 
-describe('AppController (e2e)', () => {
+describe('Authentication System', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-      providers: [AuthService, AuthGuard]
+      imports: [AppModule]
     }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('handles a signup request', () => {
+    const email = 'asdlkjq432@akl.com';
+
     return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+      .post('/auth/signup')
+      .send({ email, password: 'alskdfjl' })
+      .expect(201)
+      .then((res) => {
+        const { id, email } = res.body;
+        expect(id).toBeDefined();
+        expect(email).toEqual(email);
+      });
   });
 });
